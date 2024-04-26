@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <title>Page Title</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+  <style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Không cho phép trượt trang */
+        background-image: url("space.jpg") ; /* Đường dẫn tới hình ảnh nền */
+        background-size: cover; /* Kích thước hình ảnh nền sẽ được điều chỉnh để phù hợp với kích thước của cửa sổ trình duyệt */
+        background-position: center; /* Canh chỉnh hình ảnh nền ở giữa */
+        background-repeat: no-repeat; /* Không lặp lại hình ảnh nền */   
+    }
+    
+    canvas {
+      display: block; /* Loại bỏ khoảng trống dư thừa */
+      width: 1016px; /* Đặt kích thước chiều rộng của canvas */
+
+    }
+  </style>
+</head>
+<body class="background">
+  <canvas></canvas>
+  <script src="./app.js"></script>
+  <script src="./main.css"></script>
+</body>
+</html>
