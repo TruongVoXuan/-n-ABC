@@ -1,8 +1,8 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-canvas.width = document.documentElement.clientWidth // Sử dụng document.documentElement.clientWidth thay vì innerWidth
-canvas.height = document.documentElement.clientHeight // Sử dụng document.documentElement.clientHeight thay vì innerHeight
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight   // Sử dụng document.documentElement.clientHeight thay vì innerHeight
 
 class Player {
   constructor() {
@@ -62,51 +62,7 @@ class Player {
   }
 
 }
-class Enemy {
-  constructor({ position }) {
 
-    this.velocity = {
-      x: -2,
-      y: 0,
-    }
-
-    this.rotation = 0;
-
-    const image = new Image()
-    image.src = './alien.png'
-
-    image.onload = () => {
-      this.image = image
-
-      this.width = image.width * 0.04
-      this.height = image.height * 0.04
-
-      this.position = {
-    
-        x: position.x,
-        y: position.y
-      }
-    }
-  }
-
-  draw() {
-    // Vẽ hình ảnh của người chơi
-    c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
-  }
-
-  update({ velocity }) {
-    if (this.image) {
-      // Cập nhật vận tốc của kẻ thù theo vận tốc của lưới
-    
-
-      // Di chuyển kẻ thù theo vận tốc mới
-      this.position.x += velocity.x;
-      this.position.y += velocity.y;
-
-      this.draw();
-    }
-  }
-}
 
 
 class Bullet {
@@ -129,6 +85,52 @@ class Bullet {
     this.position.y += this.velocity.y
   }
 }
+
+class Enemy {
+  constructor({ position }) {
+    this.velocity = {
+      x: 2, // Bắt đầu bằng cách di chuyển sang trái
+      y: 0,
+    }
+
+    this.image = new Image()
+    this.image.src = './alien.png'
+
+    this.image.onload = () => {
+      this.width = this.image.width * 0.04
+      this.height = this.image.height * 0.04
+
+      this.position = {
+        x: position.x,
+        y: position.y // Đặt enemy ở trên cùng màn hình
+      }
+    }
+  }
+
+  draw() {
+    // Vẽ hình ảnh của enemy
+    c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+  }
+
+  update() {
+    if (this.position && this.image) {
+      // Di chuyển enemy theo vận tốc hiện tại
+      this.position.x += this.velocity.x;
+
+      // Kiểm tra xem enemy đã đi đến biên của màn hình chưa
+      if (this.position.x + this.width >= canvas.width) {
+        // Nếu di chuyển đến biên phải của màn hình, chuyển hướng sang trái
+        this.velocity.x = -Math.abs(this.velocity.x);
+      } else if (this.position.x <= 0) {
+        // Nếu di chuyển đến biên trái của màn hình, chuyển hướng sang phải
+        this.velocity.x = Math.abs(this.velocity.x);
+      }
+
+      this.draw();
+    }
+  }
+}
+
 class Grid {
   constructor() {
     this.position = {
@@ -136,51 +138,34 @@ class Grid {
       y: 0,
     };
     this.velocity = {
-      x: 9, // Bắt đầu bằng cách di chuyển sang phải
+      x: 0, // Bắt đầu bằng cách di chuyển sang phải
       y: 0,
     };
     this.enemies = [];
 
-    const rows = Math.floor(Math.random() * 5 + 4);
-    const columns = Math.floor(Math.random() * 5 + 2);
-
-    this.cellWidth = 60;
-    this.cellHeight = 60;
+    const columns = Math.floor(Math.random() * 10 + 2)
+    const rows = Math.floor(Math.random() * 10 + 1) // Đổi số hàng từ 100 thành 4
 
     for (let x = 0; x < columns; x++) {
       for (let y = 0; y < rows; y++) {
+        const randomYOffset = Math.random() * 60; // Random một khoảng cách y ngẫu nhiên
         this.enemies.push(new Enemy({
           position: {
-            x: x * this.cellWidth,
-            y: y * this.cellHeight
+            x: x * 60,
+            y: y * 60 + randomYOffset // Thêm randomYOffset vào vị trí y
           }
         }));
       }
     }
 
-    this.width = columns * this.cellWidth;
-    this.height = rows * this.cellHeight;
   }
 
   update() {
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-
-    // Kiểm tra xem lưới đã đi đến biên của màn hình chưa
-    if (this.position.x + this.width >= canvas.width) {
-        // Nếu di chuyển đến biên phải của lưới, chuyển hướng sang trái
-        this.velocity.x = -Math.abs(this.velocity.x);
-    } else if (this.position.x <= 0) {
-        // Nếu di chuyển đến biên trái của màn hình, chuyển hướng sang phải
-        this.velocity.x = Math.abs(this.velocity.x);
-    }
-
     this.enemies.forEach(enemy => {
-        enemy.update({ velocity: this.velocity });
+      enemy.update();
     });
+  }
 }
-}
-
 
 const player = new Player()
 
@@ -210,9 +195,9 @@ let shootingInterval;
 let shootingKeyDown = false;
 function animate() {
   requestAnimationFrame(animate)
-  c.fillStyle = 'black' 
-  c.clearRect(0, 0, canvas.width, canvas.height*2);
-  c.fillRect(0, 10000, canvas.width, canvas.height*2)
+  c.fillStyle = 'black'
+  c.clearRect(0, 0, canvas.width, canvas.height * 2);
+  c.fillRect(0, 10000, canvas.width, canvas.height * 2)
   player.update()
 
 
@@ -231,7 +216,7 @@ function animate() {
   grids.forEach((grid) => {
     grid.update()
     grid.enemies.forEach(enemy => {
-      enemy.update({velocity: grid.velocity})
+      enemy.update({ velocity: grid.velocity })
     })
   })
 
