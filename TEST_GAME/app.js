@@ -69,7 +69,7 @@ class Bullet {
   constructor({ position, velocity }) {
     this.position = position
     this.velocity = velocity
-    this.radius = 3
+    this.radius = 10
   }
   draw() {
     c.beginPath()
@@ -86,15 +86,39 @@ class Bullet {
   }
 }
 
+class EnemyBullet {
+  constructor({ position, velocity }) {
+    this.position = position
+    this.velocity = velocity
+    this.width=3
+    this.height=10
+  }
+  draw() {
+    c.fillStyle = 'yellow'
+    c.fillRect(this.position.x, this.position.y, this.width, this.height)
+  }
+  //update để hiển thị hình ảnh đạn
+  update() {
+    this.draw()
+    this.position.x += this.velocity.x
+    this.position.y += this.velocity.y
+  }
+}
+
+
 class Enemy {
   constructor({ position }) {
     this.velocity = {
-      x: 2, // Bắt đầu bằng cách di chuyển sang trái
-      y: 0,
+      x: 1, // Bắt đầu bằng cách di chuyển sang trái
+      y: 0.09, // Thêm tốc độ y để kẻ thù di chuyển xuống
     }
 
     this.image = new Image()
     this.image.src = './alien.png'
+
+    this.shootInterval = 300; // Khoảng thời gian giữa các đợt bắn (miligiây)
+    this.shootTimer = 0; // Đếm thời gian đã trôi qua từ lần bắn đạn trước đó
+    this.canShoot = false; // Biến đánh dấu xem kẻ địch có thể bắn hay không
 
     this.image.onload = () => {
       this.width = this.image.width * 0.04
@@ -107,6 +131,20 @@ class Enemy {
     }
   }
 
+  spawnEnemyBullet(enemyBullets) {
+    // Tạo một viên đạn mới và thêm nó vào mảng enemyBullets
+    enemyBullets.push(new EnemyBullet({
+      position: {
+        x: this.position.x + this.width / 2, // Bắt đầu từ giữa kẻ thù
+        y: this.position.y + this.height, // Bắt đầu từ dưới cùng của kẻ thù
+      },
+      velocity: {
+        x: 0, // Đạn di chuyển thẳng xuống
+        y: 2, // Tốc độ di chuyển của đạn
+      }
+    }));
+  }
+
   draw() {
     // Vẽ hình ảnh của enemy
     c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
@@ -116,6 +154,8 @@ class Enemy {
     if (this.position && this.image) {
       // Di chuyển enemy theo vận tốc hiện tại
       this.position.x += this.velocity.x;
+
+      this.position.y += this.velocity.y; // Thêm dòng này để kẻ thù di chuyển xuống
 
       // Kiểm tra xem enemy đã đi đến biên của màn hình chưa
       if (this.position.x + this.width >= canvas.width) {
@@ -127,6 +167,31 @@ class Enemy {
       }
 
       this.draw();
+    }
+
+    this.shootTimer += 1; // Tăng đếm thời gian
+    if (this.shootTimer >= this.shootInterval) {
+      this.canShoot = true; // Đủ thời gian để bắn đạn
+      this.shootTimer = 0; // Đặt lại đếm thời gian
+    }
+  }
+  
+
+  shoot(enemyBulletArray) {
+    if (this.canShoot) {
+      enemyBulletArray.push(
+        new EnemyBullet({
+          position: {
+            x: this.position.x + this.width / 2,
+            y: this.position.y + this.height,
+          },
+          velocity: {
+            x: 0, // Cập nhật tốc độ di chuyển theo ý muốn
+            y: 2, // Cập nhật tốc độ di chuyển theo ý muốn
+          }
+        })
+      );
+      this.canShoot = false; // Đánh dấu là đã bắn
     }
   }
 }
@@ -143,8 +208,8 @@ class Grid {
     };
     this.enemies = [];
 
-    const columns = Math.floor(Math.random() * 10 + 2)
-    const rows = Math.floor(Math.random() * 10 + 1) // Đổi số hàng từ 100 thành 4
+    const columns = Math.floor(Math.random() * 5 + 2)
+    const rows = Math.floor(Math.random() * 5 + 1) // Đổi số hàng từ 100 thành 4
 
     for (let x = 0; x < columns; x++) {
       for (let y = 0; y < rows; y++) {
@@ -173,6 +238,8 @@ const grids = [new Grid()]
 
 const Bullets = []
 
+const enemyBullets = []
+
 const keys = {
   a: {
     pressed: false
@@ -191,44 +258,73 @@ const keys = {
   }
 }
 
+let frames = 0; // Di chuyển lên phía trên hàm animate
 let shootingInterval;
 let shootingKeyDown = false;
+let gameOverFlag = false;
+let animationId; // Thêm biến này để lưu ID của requestAnimationFrame
+
 function animate() {
-  requestAnimationFrame(animate)
-  c.fillStyle = 'black'
-  c.clearRect(0, 0, canvas.width, canvas.height * 2);
-  c.fillRect(0, 10000, canvas.width, canvas.height * 2)
-  player.update()
+  frames++; // Di chuyển dòng này lên phía trên hàm animate
+  animationId = requestAnimationFrame(animate); // Lưu ID trả về từ requestAnimationFrame
+  c.fillStyle = 'black';
+  c.clearRect(0, 0, canvas.width, canvas.height); // Xóa màn hình để vẽ lại
 
+  // Kiểm tra nếu trò chơi chưa kết thúc thì cập nhật người chơi
+  if (!gameOverFlag) {
+    player.update();
+  }
 
-
+  // Cập nhật đạn của người chơi
   Bullets.forEach((bullet, index) => {
-
-    // Xóa đạn nếu đi ra ngoài màn hình
     if (bullet.position.y + bullet.radius <= 0) {
       setTimeout(() => {
         Bullets.splice(index, 1);
       }, 0);
+    } else {
+      bullet.update();
     }
-    else bullet.update();
   });
 
   grids.forEach((grid) => {
-    grid.update()
-    grid.enemies.forEach(enemy => {
-      enemy.update({ velocity: grid.velocity })
-    })
-  })
+    grid.update();
+    grid.enemies.forEach((enemy, i) => {
+      enemy.update({ velocity: grid.velocity });
+
+      // Tạo đạn từ kẻ thù sau mỗi 100 khung hình
+      if (frames % 100 === 0) {
+        enemy.spawnEnemyBullet(enemyBullets);
+      }
+
+      // Va chạm giữa đạn của người chơi và kẻ địch
+      Bullets.forEach((bullet, j) => {
+        if (
+          bullet.position.y - bullet.radius <= enemy.position.y + enemy.height &&
+          bullet.position.x + bullet.radius >= enemy.position.x &&
+          bullet.position.x - bullet.radius <= enemy.position.x + enemy.width
+        ) {
+          setTimeout(() => {
+            grid.enemies.splice(i, 1);
+            Bullets.splice(j, 1);
+          }, 0);
+        }
+        enemy.shoot(enemyBullets);
+      });
+    });
+  });
+
+  // Cập nhật đạn của kẻ địch (cần sửa đoạn này)
+  enemyBullets.forEach((enemyBullet) => {
+    enemyBullet.update();
+  });
 
   if (keys.a.pressed && player.position.x >= 0) {
     player.velocity.x = -7;
     player.rotation = -0.15;
-  }
-  else if (keys.d.pressed && player.position.x + player.width <= canvas.width) {
+  } else if (keys.d.pressed && player.position.x + player.width <= canvas.width) {
     player.velocity.x = 7;
     player.rotation = 0.15;
-  }
-  else {
+  } else {
     player.velocity.x = 0;
     player.rotation = 0;
   }
@@ -259,9 +355,45 @@ function animate() {
     clearInterval(shootingInterval); // Dừng setInterval
     shootingKeyDown = false; // Đánh dấu rằng phím không còn được giữ nữa
   }
-}
-animate()
 
+  // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi
+  enemyBullets.forEach((enemyBullet, k) => {
+    if (
+      enemyBullet.position.y + enemyBullet.height >= player.position.y &&
+      enemyBullet.position.x >= player.position.x &&
+      enemyBullet.position.x <= player.position.x + player.width
+    ) {
+      // Khi va chạm xảy ra, gọi hàm gameOver
+      gameOver();
+    }
+  });
+}
+
+animate();
+
+function gameOver() {
+  // Dừng vòng lặp game
+  cancelAnimationFrame(animationId); // Hủy requestAnimationFrame bằng cách sử dụng ID đã lưu
+  gameOverFlag = true;
+
+  // Hiển thị thông báo game over
+  c.fillStyle = 'red';
+  c.font = '30px Arial';
+  c.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
+}
+
+
+let spawnInterval;
+function spawnEnemies() {
+  // Tạo một kẻ thù mới và thêm vào mảng grids
+  grids.push(new Grid());
+
+  // Thiết lập một khoảng thời gian để tạo ra kẻ thù tiếp theo
+  spawnInterval = setTimeout(spawnEnemies, 12000); // Tạo ra một kẻ thù mới mỗi 2 giây
+}
+
+// Bắt đầu tạo kẻ thù
+spawnEnemies();
 
 addEventListener('keydown', ({ key }) => {
   switch (key) {
