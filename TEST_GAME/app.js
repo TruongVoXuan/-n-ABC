@@ -17,7 +17,7 @@ export class Player {
     const image = new Image()
     image.src = './spaceship.png'
 
-
+    this.hp = 100; // Khởi tạo máu của người chơi
 
     image.onload = () => {
 
@@ -53,22 +53,37 @@ export class Player {
     c.restore(); // Khôi phục trạng thái canvas trước đó
   }
 
+   // Phương thức để giảm máu của người chơi
+   decreaseHP(amount) {
+    this.hp -= amount; // Giảm máu của người chơi đi một lượng amount
+    if (this.hp < 0) {
+        gameOver(); // Kết thúc trò chơi nếu máu của người chơi hết
+    }
+  }
+
+
   checkItemCollision(items) {
     items.forEach((item, index) => {
       if (
         this.position.y + this.height >= item.position.y && // Kiểm tra va chạm theo chiều dọc
         this.position.y <= item.position.y + item.height && // Kiểm tra va chạm theo chiều dọc
         this.position.x + this.width >= item.position.x && // Kiểm tra va chạm theo chiều ngang
-        this.position.x <= item.position.x + item.width // Kiểm tra va chạm theo chiều ngang
+        this.position.x <= item.position.x + item.width && // Kiểm tra va chạm theo chiều ngang
+        player.hp < 100 // Kiểm tra xem HP của người chơi đã dưới 100 chưa
       ) {
         // Xóa item khi người chơi ăn được
         items.splice(index, 1);
+        // Tính toán số lượng HP cần tăng, đảm bảo không vượt quá 100
+        const hpToAdd = Math.min(100 - player.hp, 20);
         // Tăng điểm số hoặc thực hiện hành động tương ứng
         score += 50; // Ví dụ: Tăng điểm số lên 50 khi ăn được item
+        player.hp += hpToAdd; // Sửa đổi giá trị hp của người chơi
         console.log("Score: ", score);
+        console.log("HP: ", player.hp); // Kiểm tra giá trị hp mới
       }
     });
   }
+  
 
   update() {
     if (this.image) {
@@ -372,6 +387,21 @@ let gameOverFlag = false;
 // let animationId; // Thêm biến này để lưu ID của requestAnimationFrame
 let score = 0;
 
+const healthBarWidth = 200;
+const healthBarHeight = 20;
+const healthBarX = 50;
+const healthBarY = 80;
+
+function drawHealthBar() {
+  // Vẽ chữ HP
+  c.fillStyle = 'white'; // Màu của chữ HP
+  c.font = '30px Arial'; // Kiểu chữ và kích thước
+  c.fillText('HP:', healthBarX -40, healthBarY + 20); // Vẽ chữ HP tại vị trí xác định
+
+  // Vẽ thanh máu
+  c.fillStyle = 'green'; // Màu của thanh máu
+  c.fillRect(healthBarX +20, healthBarY, healthBarWidth * (player.hp / 100), healthBarHeight); // Vẽ thanh máu với chiều dài thích hợp dựa trên HP của người chơi
+}
 
 function gameOver() {
   // Dừng vòng lặp game
@@ -405,6 +435,8 @@ function animate() {
 
   updateScoreAndCheckOverlay();
 
+  drawHealthBar(); // Vẽ lại thanh máu
+
   // Cập nhật đạn của người chơi
   Bullets.forEach((bullet, index) => {
     if (bullet.position.y + bullet.radius <= 0) {
@@ -425,6 +457,22 @@ function animate() {
       if (frames % (2000/1.5) === 0) {
         enemy.spawnEnemyBullet(enemyBullets);
       }
+
+      // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi
+  enemyBullets.forEach((enemyBullet, k) => {
+    if (
+      enemyBullet.position.y <= player.position.y + player.height &&
+      enemyBullet.position.y + enemyBullet.height >= player.position.y &&
+      enemyBullet.position.x + enemyBullet.width >= player.position.x &&
+      enemyBullet.position.x <= player.position.x + player.width
+    ) {
+      // Khi va chạm xảy ra, giảm máu của người chơi
+      player.decreaseHP(10); // Giảm 10 điểm máu khi bị trúng đạn của kẻ địch
+      // Xóa đạn của kẻ địch sau khi va chạm
+      enemyBullets.splice(k, 1);
+    }
+  });
+
 
       // Va chạm giữa đạn của người chơi và kẻ địch
       Bullets.forEach((bullet, j) => {
@@ -518,8 +566,7 @@ items.forEach(item => {
       enemyBullet.position.x + enemyBullet.width >= player.position.x &&
       enemyBullet.position.x <= player.position.x + player.width
     ) {
-      // Khi va chạm xảy ra, gọi hàm gameOver
-      gameOver();
+    
     }
   });
 }
