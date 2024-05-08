@@ -1,3 +1,4 @@
+
 export const canvas = document.querySelector('canvas')
 export const c = canvas.getContext('2d')
 
@@ -224,12 +225,12 @@ export class Enemy {
   }
 
   update() {
+    // Kiểm tra xem position và image đã được khởi tạo chưa
     if (this.position && this.image) {
       // Di chuyển enemy theo vận tốc hiện tại
       this.position.x += this.velocity.x;
-
       this.position.y += this.velocity.y; // Thêm dòng này để kẻ thù di chuyển xuống
-
+  
       // Kiểm tra xem enemy đã đi đến biên của màn hình chưa
       if (this.position.x + this.width >= canvas.width) {
         // Nếu di chuyển đến biên phải của màn hình, chuyển hướng sang trái
@@ -238,17 +239,24 @@ export class Enemy {
         // Nếu di chuyển đến biên trái của màn hình, chuyển hướng sang phải
         this.velocity.x = Math.abs(this.velocity.x);
       }
-
+  
+      // Vẽ enemy
       this.draw();
     }
-
+  
     this.shootTimer += 1; // Tăng đếm thời gian
     if (this.shootTimer >= this.shootInterval) {
       this.canShoot = true; // Đủ thời gian để bắn đạn
       this.shootTimer = 0; // Đặt lại đếm thời gian
     }
+  
+    // Kiểm tra nếu enemy vượt quá góc màn hình phía dưới
+    if (this.position && this.position.y + this.height >= canvas.height) {
+      // Nếu vượt quá, kết thúc trò chơi
+      gameOver(); // Hàm gameOver() cần được triển khai để kết thúc trò chơi
+    }
   }
-
+  
 
   shoot(enemyBulletArray) {
     if (this.canShoot) {
@@ -411,7 +419,7 @@ function gameOver() {
 
   // Hiển thị thông báo game over
   c.fillStyle = 'red';
-  c.font = '30px Arial';
+  c.font = 'bold 48px Arial';
   c.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
 }
 let animationId; // Thêm biến này để lưu ID của requestAnimationFrame
@@ -625,42 +633,6 @@ function resetGame() {
   score = 0; // Đặt lại điểm số
 }
 
-function startLevel2() {
-  // Bắt đầu màn 2
-  // Tạo một môi trường mới cho màn 2
-  grids.length = 0; // Xóa các grid của màn trước
-  const newGrid = new Grid(); // Tạo một grid mới
-  for (let i = 0; i < 20; i++) {
-    // Thêm kẻ thù vào grid mới
-    const enemy = new Enemy({
-      position: {
-        x: Math.random() * canvas.width, // Random vị trí theo chiều ngang
-        y: Math.random() * canvas.height * 0.5, // Random vị trí theo chiều dọc (trên một nửa màn hình)
-      },
-    });
-    enemy.isLevel2 = true; // Thiết lập isLevel2 thành true cho màn 2
-    newGrid.enemies.push(enemy);
-  }
-  grids.push(newGrid); // Thêm grid mới vào mảng grids
-
-  // Thiết lập isLevel2 thành true cho tất cả các kẻ thù trong màn 2
-  grids.forEach(grid => {
-    grid.enemies.forEach(enemy => {
-      enemy.isLevel2 = true;
-      enemy.image.src = './boss.png';
-    });
-  });
-
-   // Bắt đầu tạo kẻ thù sau một khoảng thời gian trong màn 2
-   spawnEnemies();
-  // Bắt đầu vòng lặp game lại
-  animate();
-
- 
-
- 
-}
-
 
 
 
@@ -675,6 +647,44 @@ function spawnEnemies() {
 
 // Bắt đầu tạo kẻ thù
 spawnEnemies();
+
+function startLevel2() {
+  // Bắt đầu màn 2
+  // Tạo một môi trường mới cho màn 2
+  grids.length = 0; // Xóa các grid của màn trước
+  const newGrid = new Grid(); // Tạo một grid mới
+  for (let i = 0; i < 20; i++) {
+    // Thêm kẻ thù loại boss vào grid mới
+    const bossEnemy = new Enemy({
+      position: {
+        x: Math.random() * canvas.width, // Random vị trí theo chiều ngang
+        y: Math.random() * canvas.height * 0.5, // Random vị trí theo chiều dọc (trên một nửa màn hình)
+      },
+    });
+    bossEnemy.isLevel2 = true; // Thiết lập isLevel2 thành true cho màn 2
+    bossEnemy.image.src = './boss.png'; // Sử dụng hình ảnh của boss
+    newGrid.enemies.push(bossEnemy);
+
+    // Thêm kẻ thù loại alien vào grid mới
+    const alienEnemy = new Enemy({
+      position: {
+        x: Math.random() * canvas.width, // Random vị trí theo chiều ngang
+        y: Math.random() * canvas.height * 0.5, // Random vị trí theo chiều dọc (trên một nửa màn hình)
+      },
+    });
+    alienEnemy.isLevel2 = true; // Thiết lập isLevel2 thành true cho màn 2
+    alienEnemy.image.src = './alien.png'; // Sử dụng hình ảnh của alien
+    newGrid.enemies.push(alienEnemy);
+  }
+  grids.push(newGrid); // Thêm grid mới vào mảng grids
+
+  // Bắt đầu tạo kẻ thù sau một khoảng thời gian trong màn 2
+  spawnEnemies();
+  // Bắt đầu vòng lặp game lại
+  animate();
+}
+
+
 
 addEventListener('keydown', ({ key }) => {
   switch (key) {
