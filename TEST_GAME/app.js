@@ -56,11 +56,21 @@ export class Player {
 
    // Phương thức để giảm máu của người chơi
    decreaseHP(amount) {
-    this.hp -= amount; // Giảm máu của người chơi đi một lượng amount
+    this.hp -= amount;
     if (this.hp < 0) {
-        gameOver(); // Kết thúc trò chơi nếu máu của người chơi hết
+        // Ẩn hình ảnh người chơi
+        this.image = null;
+        
+        // Tạm dừng trò chơi
+       
+        // Kích hoạt hiệu ứng nổ của người chơi và chờ 1 giây trước khi thực hiện các hành động tiếp theo
+        createExplosion({ object: this });
+        setTimeout(() => {
+            // Xử lý kết thúc trò chơi
+            gameOver();
+        }, 500); // Chờ 0.5 giây trước khi kết thúc trò chơi
     }
-  }
+}
 
 
   checkItemCollision(items) {
@@ -209,6 +219,8 @@ export class Enemy {
   }
   
   destroy(items) {
+   // Kích hoạt hiệu ứng nổ
+   createExplosion({ object: this });
     // Kiểm tra xem enemy là ở màn 2 hay không
     if (this.isLevel2) {
       // Nếu ở màn 2, kiểm tra lại với Math.random() để quyết định có item hay không
@@ -218,6 +230,11 @@ export class Enemy {
         items.push(newItem); // Thêm item vào mảng items
       }
     }
+     // Loại bỏ kẻ địch khỏi grid
+     const index = grids[0].enemies.indexOf(this);
+     if (index !== -1) {
+       grids[0].enemies.splice(index, 1);
+     }
   }
   draw() {
     // Vẽ hình ảnh của enemy
@@ -411,6 +428,7 @@ function drawHealthBar() {
   c.fillRect(healthBarX +20, healthBarY, healthBarWidth * (player.hp / 100), healthBarHeight); // Vẽ thanh máu với chiều dài thích hợp dựa trên HP của người chơi
 }
 
+
 function gameOver() {
   // Dừng vòng lặp game
   cancelAnimationFrame(animationId);
@@ -591,7 +609,21 @@ function updateScoreAndCheckOverlay() {
     level2Flag = true; // Đánh dấu rằng đã hiển thị overlay màn 2
     showLevel2Message();
   }
+   // Kiểm tra điều kiện hoàn thành game
+   if (score >= 500 && level2Flag) {
+    showCongratulationsMessage();
+  }
 }
+function showCongratulationsMessage() {
+  const overlay2 = document.getElementById('overlay2');
+  overlay2.style.display = 'flex'; // Hiển thị overlay
+
+  // Dừng vòng lặp chính của game
+  cancelAnimationFrame(animationId);
+  clearInterval(spawnInterval);
+ 
+}
+
 
 
 function showLevel2Message() {
