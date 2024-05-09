@@ -1,0 +1,90 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html {
+    overflow: hidden; /* Loại bỏ thanh trượt */
+    height: 100%;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+
+
+a {
+    text-decoration: none;
+    color: #111;
+}
+
+html {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 20px;
+    font-size: 13px;
+}
+
+.header {
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    z-index: -1; /* Đảm bảo rằng phần tử .header nằm dưới các phần tử khác */
+}
+
+
+
+.menu {
+    color: #fff;
+    width: 50%;
+    max-width: 300px; /* Đảm bảo menu không quá rộng */
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    font-family: 'Press Start 2P', cursive;
+    position: fixed; /* Để menu cố định và không ảnh hưởng đến phần tử .header */
+    left: 0; /* Đặt menu ở góc trái */
+    top: 0; /* Đặt menu ở góc trên */
+    bottom: 0; /* Chiếm toàn bộ chiều cao của màn hình */
+    text-align: center; /* Căn giữa nội dung trong menu */
+    z-index: 1; /* Đảm bảo rằng menu nằm trên phần tử .header */
+}
+.menu h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    margin-top: 250px;
+}
+
+.menu h3 {
+    font-weight: 300;
+    font-size: 1.5em;
+    letter-spacing: 5px;
+    margin-bottom: 50px;
+    margin-top: 20px;
+}
+
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    margin: 10px 0;
+}
+
+.menu li a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+.menu li a:hover {
+    color: #dbdbdb;
+}

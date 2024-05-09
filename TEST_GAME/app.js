@@ -625,7 +625,6 @@ function showCongratulationsMessage() {
 }
 
 
-
 function showLevel2Message() {
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex'; // Hiển thị overlay
@@ -716,7 +715,56 @@ function startLevel2() {
   animate();
 }
 
+// Tạo một hàm để hiển thị lại menu game
+function showGameMenu() {
+  // Hiển thị menu game (ví dụ: bằng cách hiển thị overlay)
+  const gameMenu = document.getElementById('game-menu');
+  gameMenu.style.display = 'block';
+}
 
+// Lắng nghe sự kiện keydown
+document.addEventListener('keydown', function(event) {
+  // Nếu phím Esc được nhấn
+  if (event.key === 'Escape') {
+      // Chuyển hướng về trang menu_game.html
+      window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html';
+  }
+});
+
+// Lưu trạng thái trò chơi
+function saveGameState(gameState) {
+  localStorage.setItem('gameState', JSON.stringify(gameState));
+}
+
+// Tải trạng thái trò chơi
+function loadGameState() {
+  const gameStateJSON = localStorage.getItem('gameState');
+  if (gameStateJSON) {
+      return JSON.parse(gameStateJSON);
+  } else {
+      return null;
+  }
+}
+
+// Xóa trạng thái trò chơi
+function clearGameState() {
+  localStorage.removeItem('gameState');
+}
+
+// Lưu trạng thái trò chơi khi người chơi thoát trò chơi hoặc chuyển sang trang khác
+window.addEventListener('beforeunload', function() {
+  // Lưu trạng thái trò chơi
+  // Ví dụ: saveGameState({ playerPosition: [x, y], score: 100, level: 2 });
+});
+
+// Sử dụng khi người chơi nhấp vào nút "Continue"
+function continueGame() {
+  const gameState = loadGameState();
+  if (gameState) {
+      // Khôi phục trạng thái trò chơi
+      // Ví dụ: player.moveTo(gameState.playerPosition);
+  }
+}
 
 addEventListener('keydown', ({ key }) => {
   switch (key) {
