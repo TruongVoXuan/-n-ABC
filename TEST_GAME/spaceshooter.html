@@ -29,6 +29,8 @@
   <canvas></canvas>
   <script type="module" src="./app.js"></script>
   <script src="./main.css"></script>
+
+  
   
   <div id="wrapper">
     <div id="overlay">
@@ -38,17 +40,83 @@
         <p style="font-size: 40; color: red">Bấm Enter để tiếp tục</p>
       </div>
     </div>
-</div>
+  </div>
 
-<div id="wrapper2">
-  <div id="overlay2">
-    <div id="message2">
-      <h2>Chúc mừng!</h2>
-      <p>Bạn đã hoàn thành game</p> 
+    
+  <div id="wrapper_B">
+    <div id="overlay_B">
+      <div id="message_B">
+        <h2>Chúc mừng!</h2>
+        <p>Chúc mừng bạn đã hoàn thành game!</p> 
+        <p style="font-size: 40; color: red">Bấm Enter để trở về menu</p>
+      </div>
     </div>
+  </div>
+<!-- Overlay Game Over -->
+<div id="overlay_Die" class="overlay_Die">
+  <div class="game-over">
+      <h1>Game Over</h1>
+      <button id="RS_GAME">Restart</button>
   </div>
 </div>
 
+  <div id="wrapper2">
+    <div id="overlay2">
+      <div id="message2">
+        <h2>Chúc mừng!</h2>
+        <p>Bạn đã vượt qua màn 2. Tiếp tục chơi để đối mặt với BOSS màn 3!</p>
+        <p style="font-size: 40; color: red">Bấm Enter để tiếp tục</p> 
+      </div>
+    </div>
+  </div>
+  <!-- Nút Pause -->
+  <div class="button1" id="pauseBtn">
+    <button>Pause</button>
+  </div>
   
+  <!-- Nút Resume -->
+  <div id="resumeBtn">
+    <button id="continute" disabled>Resume</button>
+  </div>
+
+  <!-- Nút Exit -->
+  <div class="button">
+    <button onclick="exitMenu()">Exit-Menu</button>
+  </div>
+
+  
+
+  <script>
+    // Variables
+let animationId;
+let paused = false; // Đặt trạng thái ban đầu của trò chơi
+let gameOverFlag = false;
+let time = 0;
+
+// Game Functions
+
+function pauseGame() {
+  paused = true;
+  cancelAnimationFrame(animationId); // Dừng vòng lặp animation frame
+  console.log("Game paused");
+}
+
+function resumeGame() {
+  paused = false;
+  console.log("Game resumed");
+  if (!gameOverFlag) {
+    requestAnimationFrame(animate); // Nếu trò chơi chưa kết thúc, tiếp tục vòng lặp animation frame
+  }
+}
+
+
+function exitMenu() {
+  window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html';
+}
+
+
+
+  </script>
+
 </body>
 </html>

@@ -12,6 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
         // Ngăn chặn hành vi mặc định của thẻ a
         event.preventDefault();
         // Đặt cửa sổ hiện tại sang trạng thái không có nội dung
-        window.location.href = "about:blank";
+       window.close();
     });
 });
