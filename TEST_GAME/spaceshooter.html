@@ -26,6 +26,9 @@
   </style>
 </head>
 <body class="background">
+
+  
+
   <canvas></canvas>
   <script type="module" src="./app.js"></script>
   <script src="./main.css"></script>
@@ -52,13 +55,11 @@
       </div>
     </div>
   </div>
-<!-- Overlay Game Over -->
-<div id="overlay_Die" class="overlay_Die">
-  <div class="game-over">
-      <h1>Game Over</h1>
-      <button id="RS_GAME">Restart</button>
-  </div>
-</div>
+
+
+
+
+
 
   <div id="wrapper2">
     <div id="overlay2">
@@ -69,20 +70,31 @@
       </div>
     </div>
   </div>
-  <!-- Nút Pause -->
-  <div class="button1" id="pauseBtn">
-    <button>Pause</button>
-  </div>
-  
-  <!-- Nút Resume -->
-  <div id="resumeBtn">
-    <button id="continute" disabled>Resume</button>
-  </div>
 
-  <!-- Nút Exit -->
-  <div class="button">
-    <button onclick="exitMenu()">Exit-Menu</button>
+  <div id="overlay_Die" class="overlay_Die">
+    <div class="game-over">
+        <h1>Game Over</h1>
+        
+          <button id="RS_GAME" >Trở về Menu</button> 
+        </a>
+       
+        
+    </div>  
   </div>
+  <!-- Nút Pause -->
+<a style="--clr:#1e9bff" class="button1" id="pauseBtn">
+  <button>Pause</button><i></i>
+</a>
+
+<!-- Nút Resume --> 
+<a style="--clr:#6eff3e" id="resumeBtn">
+  <button id="continute" disabled>Resume</button><i></i>
+</a>
+
+<!-- Nút Exit -->
+<a style="--clr:#ff1867" class="button">
+  <button onclick="exitMenu()">Exit-Menu</button><i></i>
+</a>
 
   
 
@@ -118,5 +130,8 @@ function exitMenu() {
 
   </script>
 
+  
+
 </body>
+
 </html>

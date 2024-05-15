@@ -1,28 +1,5 @@
-#wrapper {
-    /* CSS cho phần tử bao bọc, nếu cần */
-}
-
-#overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none; /* Ẩn ban đầu */
-    justify-content: center;
-    align-items: center;
-}
-
-#message {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-
-#overlay_B {
+/* Đặt các thuộc tính chung cho overlay */
+.overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -34,137 +11,185 @@
   align-items: center;
 }
 
-#message_B {
+/* Phong cách chung cho hộp thông báo */
+.message {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-
-#overlay2 {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none; /* Ẩn ban đầu */
-    justify-content: center;
-    align-items: center;
+/* Áp dụng lớp overlay và message cho các phần tử cụ thể */
+#overlay, #overlay_B, #overlay2, .overlay_Die {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none; /* Ẩn ban đầu */
+  justify-content: center;
+  align-items: center;
 }
 
+#message, #message_B, .game-over {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Phong cách riêng cho #message2 */
 #message2 {
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 48px;
-    color: firebrick;
-    font-weight: bold;
-    font-style: Arial;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: firebrick;
+  font-size: 48px;
+  font-weight: bold;
+  font-family: Arial, sans-serif; /* Sửa font-style thành font-family */
 }
 
+/* Đặt các thuộc tính chung cho các nút */
+.button1, .button, #resumeBtn {
+  position: fixed;
+  right: 20px; /* Điều chỉnh vị trí theo x */
+  z-index: 1; /* Đảm bảo nút hiển thị trên top của mọi thứ khác */
+}
 
 .button1 {
-    position: fixed;
-    top: 20px; /* Điều chỉnh vị trí theo y */
-    right: 20px; /* Điều chỉnh vị trí theo x */
-    z-index: 1; /* Đảm bảo nút hiển thị trên top của mọi thứ khác */
-  }
-  
-  
-  
-  .button{
-    position: fixed;
-    top: 80px; /* Điều chỉnh vị trí theo y */
-    right: 20px; /* Điều chỉnh vị trí theo x */
-    z-index: 1; /* Đảm bảo nút hiển thị trên top của mọi thứ khác */
-  }
-  #resumeBtn {
-    position: fixed;
-    top: 140px; /* Điều chỉnh vị trí theo y */
-    right: 20px; /* Điều chỉnh vị trí theo x */
-    z-index: 1; /* Đảm bảo nút hiển thị trên top của mọi thứ khác */
-  }
-  
-  .button1 button {
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-
-  #resumeBtn button {
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  .button button {
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-
-
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+  top: 20px; /* Điều chỉnh vị trí theo y */
 }
 
-canvas {
-    border: 1px solid black;
+.button {
+  top: 70px; /* Điều chỉnh vị trí theo y, cách nút trên 50px */
 }
 
-.overlay_Die {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
+#resumeBtn {
+  top: 20px; /* Điều chỉnh vị trí theo y, cách nút trên 50px */
+  opacity: 0; /* Thiết lập độ mờ ban đầu */
+  pointer-events: none; /* Không cho phép sự kiện click */
 }
 
-.game-over {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
+.button1 button:hover, .button button:hover, #resumeBtn button:hover {
+  background-color: #555;
 }
 
+/* Phong cách cho game-over */
 .game-over h1 {
-    color: red;
-    font-size: 36px;
-    margin-bottom: 20px;
+  color: red;
+  font-size: 36px;
+  margin-bottom: 20px;
 }
 
 .game-over button {
-    padding: 10px 20px;
-    font-size: 18px;
-    background-color: red;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .game-over button:hover {
-    background-color: darkred;
+  background-color: darkred;
 }
-  
-  
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+canvas {
+  border: 1px solid black;
+}
+
+a {
+  position: relative;
+  background: #333;
+  color: #f0f0f0;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 1.5em;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  padding: 10px 30px;
+  transition: 0.5s;
+  display: inline-block;
+  margin-bottom: 10px; /* Khoảng cách giữa các nút */
+}
+
+a:hover {
+  background: var(--clr);
+  color: var(--clr);
+  letter-spacing: 0.25em;
+  box-shadow: 0 0 35px var(--clr);
+}
+
+a:before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: #27282c;
+  z-index: 0; /* Thêm z-index để đảm bảo lớp nền không che khuất nội dung */
+}
+
+a button {
+  position: relative;
+  z-index: 1; /* Đảm bảo nút không bị che khuất */
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+a i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  z-index: 0; /* Đảm bảo lớp i không che khuất nội dung */
+}
+
+a i::before, a i::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 4px;
+  background: #27282c;
+  transition: 0.5s;
+}
+
+a i::before {
+  top: 0;
+  left: 80%;
+  transform: translateX(-50%) skewX(325deg);
+}
+
+a:hover i::before {
+  width: 20px;
+  left: 20%;
+}
+
+a i::after {
+  bottom: 0;
+  left: 20%;
+  transform: translateX(-50%) skewX(325deg);
+}
+
+a:hover i::after {
+  width: 20px;
+  left: 80%;
+}
+
+
+

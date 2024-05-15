@@ -1,4 +1,12 @@
+// Định nghĩa các tệp âm thanh
+const audioFiles = {
+    sound1: 'backgroundMusic.wav'
+    // Thêm các tệp âm thanh khác tại đây
+};
+
 document.addEventListener("DOMContentLoaded", function() {
+    playSound('sound1');
+
     // Lắng nghe sự kiện click vào nút "New-Game"
     document.getElementById("New-Game").addEventListener("click", function(event) {
         // Ngăn chặn hành vi mặc định của thẻ a (chuyển hướng trang)
@@ -14,4 +22,10 @@ document.addEventListener("DOMContentLoaded", function() {
         // Đặt cửa sổ hiện tại sang trạng thái không có nội dung
        window.close();
     });
+
+    // Hàm để phát âm thanh
+    function playSound(soundKey) {
+        const audio = new Audio(audioFiles[soundKey]);
+        audio.play();
+    }
 });

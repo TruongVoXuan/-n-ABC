@@ -248,7 +248,7 @@ export class Player {
     if (this.hp < 0) {
         // Ẩn hình ảnh người chơi
         this.image = null;
-        
+        playSound('sound6');
         // Tạm dừng trò chơi
        
         // Kích hoạt hiệu ứng nổ của người chơi và chờ 1 giây trước khi thực hiện các hành động tiếp theo
@@ -270,6 +270,8 @@ export class Player {
         this.position.x <= item.position.x + item.width && // Kiểm tra va chạm theo chiều ngang
         player.hp < 100 // Kiểm tra xem HP của người chơi đã dưới 100 chưa
       ) {
+        playSound('sound7');
+
         // Xóa item khi người chơi ăn được
         items.splice(index, 1);
         // Tính toán số lượng HP cần tăng, đảm bảo không vượt quá 100
@@ -542,12 +544,14 @@ function gameOver() {
 
   const overlay = document.getElementById('overlay_Die');
   overlay.style.display = 'flex';
+  playSound('sound6');
 }
 let animationId; // Biến lưu trữ ID của requestAnimationFrame
 
 let bossLastDestroyed = false;
 let paused = false;
 let animationRunning = false;
+let shootingSound; // Biến lưu trữ âm thanh bắn đạn
 
 function animate() {
   // Bỏ qua vòng lặp nếu trò chơi đã kết thúc
@@ -627,9 +631,11 @@ function animate() {
       
           // Kiểm tra xem enemy có phải là Boss_Last không
           if (enemy instanceof Boss_Last) {
+            
             // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
             enemy.decreaseHP(0.1); // Giảm 1 HP cho mỗi viên đạn
             if (enemy.hp <= 0) {
+             
               bossLastDestroyed = true;
               grid.enemies.splice(i, 1);
               score += 10;
@@ -638,6 +644,7 @@ function animate() {
                 showLevel2Message();
               }
               enemy.destroy(items);
+              playSound('sound5');
             }
           } else {
             // Nếu không phải Boss_Last, hủy ngay lập tức
@@ -648,6 +655,7 @@ function animate() {
               showLevel2Message();
             }
             enemy.destroy(items);
+            playSound('sound3');
           }
       
           // Xóa viên đạn sau khi va chạm
@@ -681,7 +689,6 @@ function animate() {
   drawHealthBar(); // Vẽ lại thanh máu
 
    
-
 
   // Cập nhật đạn của người chơi
   Bullets.forEach((bullet, index) => {
@@ -818,6 +825,7 @@ items.forEach(item => {
             }
           })
         );
+        playSound('sound1');
       }, 200);
 
       shootingKeyDown = true; // Đánh dấu rằng phím đã được giữ
@@ -874,8 +882,10 @@ items.forEach(item => {
   if ((keys.a.pressed && keys.ArrowLeft.pressed) || (keys.d.pressed && keys.ArrowRight.pressed)) {
     // Kiểm tra xem đã bắn đạn chưa, nếu chưa thì bắt đầu bắn
     if (!shootingKeyDown) {
+      playerShoot();
       // Bắt đầu setInterval để tự động bắn đạn mỗi 0.2 giây
       shootingInterval = setInterval(() => {
+        
         Bullets.push(
           new Bullet({
             position: {
@@ -888,7 +898,13 @@ items.forEach(item => {
             }
           })
         );
+       
+          
+       
+          
+        
       }, 200);
+   
 
       shootingKeyDown = true; // Đánh dấu rằng phím đã được giữ
     }
@@ -916,6 +932,15 @@ animate();
 
 let level2Flag  = false; // Biến đánh dấu liệu game có đang ở màn 2 hay không
 let level3Flag = false;
+
+// Hàm để dừng âm thanh
+function stopShootingSound() {
+  if (shootingSound) {
+    shootingSound.pause();
+    shootingSound.currentTime = 0;
+    shootingSound = null; // Đặt lại biến âm thanh
+  }
+}
 function updateScoreAndCheckOverlay() {
   // Cập nhật điểm số
   // Đoạn code cập nhật điểm số đã có sẵn trong hàm animate(), chỉ cần di chuyển vào đây
@@ -936,7 +961,7 @@ function updateScoreAndCheckOverlay() {
 function ThongBaoNextLevel3() {
   const overlay3 = document.getElementById('overlay2');
   overlay3.style.display = 'flex'; // Hiển thị overlay
-
+  stopShootingSound();
   // Dừng vòng lặp chính của game
   cancelAnimationFrame(animationId);
   clearInterval(spawnInterval);
@@ -948,12 +973,13 @@ function ThongBaoNextLevel3() {
 function ThongBaoEndGame() {
   const overlay4 = document.getElementById('overlay_B');
   overlay4.style.display = 'flex'; // Hiển thị overlay
-
+  stopShootingSound();
   // Dừng vòng lặp chính của game
   cancelAnimationFrame(animationId);
   clearInterval(spawnInterval);
   // Đặt sự kiện lắng nghe khi người chơi nhấn phím Enter để tiếp tục
   window.addEventListener('keydown', handleEnterKey);
+ 
  
 }
 
@@ -966,7 +992,7 @@ function ThongBaoEndGame() {
 function ThongBaoNextLevel2() {
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex'; // Hiển thị overlay
-
+  stopShootingSound();
   // Dừng vòng lặp chính của game
   cancelAnimationFrame(animationId);
   clearInterval(spawnInterval);
@@ -1024,7 +1050,20 @@ function resetGame() {
   enemyBullets.length = 0;
   Explosions.length = 0;
   score = 0; // Đặt lại điểm số
- 
+  
+}
+
+function restart() {
+   // Đặt lại tất cả các biến và mảng đối tượng của game
+  // Xóa toàn bộ các kẻ thù, đạn, v.v.
+  grids.length = 0;
+  Bullets.length = 0;
+  enemyBullets.length = 0;
+  Explosions.length = 0;
+  score = 0; // Đặt lại điểm số
+  animate()
+  console.log("Game restarted");
+  window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html';
 }
 
 
@@ -1202,34 +1241,71 @@ addEventListener('keyup', ({ key }) => {
   }
 })
 
-document.getElementById('resumeBtn').addEventListener('click', function(e) {
-  console.log('click resume button');
-  console.log('end');
-  paused =false;
-  document.getElementById("continute").setAttribute("disabled", true);
-  if (!paused ) {
-    animate();
-  }
-  console.log('paused: ', paused)
-})
-
 document.getElementById('pauseBtn').addEventListener('click', function(e) {
   paused = true;
   document.getElementById("continute").removeAttribute("disabled");
+  document.getElementById("resumeBtn").style.opacity = "1"; // Hiển thị nút "Resume" bằng cách tăng độ mờ
+  document.getElementById("resumeBtn").style.pointerEvents = "auto"; // Cho phép sự kiện click
+  this.style.display = "none"; // Ẩn nút "Pause"
   cancelAnimationFrame(animationId); // Dừng vòng lặp animation frame
   console.log("Game paused");
-  console.log('paused: ', paused)
+  console.log('paused: ', paused);
+});
+
+document.getElementById('resumeBtn').addEventListener('click', function(e) {
+  paused =false;
+  document.getElementById("continute").setAttribute("disabled", true);
+  document.getElementById("resumeBtn").style.opacity = "0"; // Ẩn nút "Resume" bằng cách làm mờ
+  document.getElementById("resumeBtn").style.pointerEvents = "none"; // Không cho phép sự kiện click
+  document.getElementById("pauseBtn").style.display = "block"; // Hiển thị nút "Pause"
+  if (!paused ) {
+    animate();
+  }
+  console.log('paused: ', paused);
+});
+
+document.getElementById('RS_GAME').addEventListener('click', function(e){
+   // Đặt lại trạng thái của trò chơi và bắt đầu lại từ đầu
+   restart()
+   console.log("RSSSSS")
+  
 })
 
 
-function PlayAgain () {
-  const restartButton = document.getElementById('RS_GAME');
+const audioFiles = {
+  sound7: 'Audio_Game/select.mp3',
+  sound1: 'Audio_Game/enemyShoot.wav',
+  
+  sound3: 'Audio_Game/explode.wav',
+  sound4: 'Audio_Game/bonus.mp3',
+  sound5: 'Audio_Game/bomb.mp3',
+  sound6: 'Audio_Game/gameOver.mp3',
+  
+  // Thêm các tệp âm thanh khác tại đây
+};
 
-  // Gán sự kiện click cho nút "Restart"
-  restartButton.addEventListener('click', function() {
-      // Gọi hàm để đặt lại trạng thái của game và bắt đầu lại từ đầu
-      resetGame();
-      animate(); // Hàm này sẽ bắt đầu lại trò chơi từ đầu
-  });
+// Hàm để tạo và phát âm thanh
+function playSound(soundName) {
+  let sound = new Audio(audioFiles[soundName]);
+  sound.play();
 }
-PlayAgain();
+
+// Sử dụng hàm playSound để phát âm thanh
+playSound('sound1'); // Phát âm thanh sound1.mp3
+playSound('sound2'); // Phát âm thanh sound2.wav
+playSound('sound3'); // Phát âm thanh sound3.mp3
+playSound('sound4'); // Phát âm thanh sound3.mp3
+playSound('sound5'); // Phát âm thanh sound3.mp3
+
+// Gọi hàm playSound tại thời điểm thích hợp
+function playerShoot() {
+  // Logic để bắn đạn của người chơi
+  playSound('sound1'); // Phát âm thanh khi bắn đạn
+}
+
+// Gọi hàm playerShoot khi người chơi bắn đạn
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space' || e.code == 'a'|| e.code == 'd') {
+    playerShoot(); // Giả sử người chơi bắn đạn khi nhấn phím Space
+  }
+});
