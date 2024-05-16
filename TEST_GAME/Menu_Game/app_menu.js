@@ -3,6 +3,7 @@ const audioFiles = {
     sound1: 'backgroundMusic.wav'
     // Thêm các tệp âm thanh khác tại đây
 };
+let isMuted = false; // Biến để theo dõi trạng thái tắt âm thanh
 
 document.addEventListener("DOMContentLoaded", function() {
     playSound('sound1');
@@ -21,7 +22,17 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         // Đặt cửa sổ hiện tại sang trạng thái không có nội dung
        window.close();
+       document.getElementById("Mute-Button").addEventListener("click", function() {
+        toggleMute();
     });
+    });
+
+    // Hàm để tắt/bật âm thanh
+function toggleMute() {
+    isMuted = !isMuted;
+    audio.muted = isMuted;
+    document.getElementById("Mute-Button").textContent = isMuted ? "Unmute" : "Mute";
+}
 
     // Hàm để phát âm thanh
     function playSound(soundKey) {

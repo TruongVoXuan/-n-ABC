@@ -9,22 +9,23 @@ canvas.height = window.innerHeight   // Sử dụng document.documentElement.cli
 
 export class Bullet {
   constructor({ position, velocity }) {
-    this.position = position
-    this.velocity = velocity
-    this.radius = 10
+    this.position = position;
+    this.velocity = velocity;
+    this.radius = 10;
   }
+
   draw() {
-    c.beginPath()
-    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
-    c.fillStyle = 'red'
-    c.fill()
-    c.closePath()
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    c.fillStyle = 'red';
+    c.fill();
+    c.closePath();
   }
-  //update để hiển thị hình ảnh đạn
+
   update() {
-    this.draw()
-    this.position.x += this.velocity.x
-    this.position.y += this.velocity.y
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
   }
 }
 
@@ -124,7 +125,7 @@ export class Enemy {
   // Kiểm tra xem enemy là ở màn 2 hay không
   if (this.isLevel2) {
     // Nếu ở màn 2, kiểm tra lại với Math.random() để quyết định có item hay không
-    if (Math.random() < 0.9) { // Ví dụ: tỷ lệ là 90%
+    if (Math.random() < 0.3) { // Ví dụ: tỷ lệ là 90%
       const newItem = new Item({ position: this.position, type: 'item_boss' }); // Tạo mới item với loại là 'item_boss'
       newItem.velocity.y = 2; // Gán vận tốc cho item để rơi xuống
       items.push(newItem); // Thêm item vào mảng items
@@ -193,116 +194,215 @@ export class Enemy {
     }
   }
 }
+
+class BulletEvol extends Bullet {
+  constructor({ position, velocity }) {
+      super({ position, velocity }); // Gọi constructor của lớp cha
+      this.radius = 15; // Đặt bán kính lớn hơn cho đạn tiến hóa
+      this.color = 'blue'; // Thêm thuộc tính color và đặt màu là blue
+  }
+
+  draw() {
+    c.save();
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, false);
+    c.fillStyle = this.color; // Đặt màu fill của đạn là màu blue
+    c.fill();
+    c.closePath();
+    c.restore();
+}
+  // Phương thức kiểm tra va chạm với kẻ địch
+  checkCollisionWithEnemy(enemy) {
+      // Kiểm tra xem vị trí của đạn có chạm vào kẻ địch không
+      if (
+          this.position.y >= enemy.position.y &&
+          this.position.y <= enemy.position.y + enemy.height &&
+          this.position.x >= enemy.position.x &&
+          this.position.x <= enemy.position.x + enemy.width
+      ) {
+          return true;
+      }
+      return false;
+  }
+}
+
+
 export class Player {
   constructor() {
-
-    this.velocity = {
-      x: 0,
-      y: 0,
-    }
-
+    this.velocity = { x: 0, y: 0 };
     this.rotation = 0;
+    this.hp = 100; // Initial health points
+    this.bullets = []; // Array to store bullets
+    this.itemCount = 0; // Keep track of the number of items collected
 
-    const image = new Image()
-    image.src = './spaceship.png'
-
-    this.hp = 100; // Khởi tạo máu của người chơi
+    const image = new Image();
+    image.src = './spaceship.png';
 
     image.onload = () => {
-
-      this.image = image
-
-      this.width = image.width * 0.2
-      this.height = image.height * 0.2
-
+      this.image = image;
+      this.width = image.width * 0.2;
+      this.height = image.height * 0.2;
       this.position = {
         x: canvas.width / 2 - this.width / 2,
         y: canvas.height - this.height - 20,
-      }
-    }
-
-
+      };
+    };
   }
 
-
-
-
   draw() {
-
-    c.save(); // Lưu trạng thái hiện tại của canvas
-
-    // Di chuyển và xoay canvas để vẽ hình ảnh theo hướng mong muốn
+    c.save();
     c.translate(this.position.x + this.width / 2, this.position.y + this.height / 2);
     c.rotate(this.rotation);
     c.translate(-this.position.x - this.width / 2, -this.position.y - this.height / 2);
-
-    // Vẽ hình ảnh của người chơi
     c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
-
-    c.restore(); // Khôi phục trạng thái canvas trước đó
+    c.restore();
   }
 
-   // Phương thức để giảm máu của người chơi
-   decreaseHP(amount) {
+  shoot() {
+    const baseBullet = {
+      position: { x: this.position.x + this.width / 2, y: this.position.y },
+      velocity: { x: 0, y: -10 },
+    };
+    this.bullets.push(new Bullet(baseBullet));
+
+    if (this.isEvolved) {
+      const angles = [0, 45, 90, 135, 180, 225, 270, 315]; // Angles in degrees for bullet directions
+      angles.forEach(angle => {
+        const radians = (angle * Math.PI) / 180;
+        const velocity = {
+          x: Math.sin(radians) * 5,
+          y: -Math.cos(radians) * 5,
+        };
+        this.bullets.push(new Bullet({
+          position: { x: this.position.x + this.width / 2, y: this.position.y },
+          velocity: velocity,
+        }));
+      });
+    }
+  }
+
+  decreaseHP(amount) {
     this.hp -= amount;
-    if (this.hp < 0) {
-        // Ẩn hình ảnh người chơi
-        this.image = null;
-        playSound('sound6');
-        // Tạm dừng trò chơi
-       
-        // Kích hoạt hiệu ứng nổ của người chơi và chờ 1 giây trước khi thực hiện các hành động tiếp theo
-        createExplosion({ object: this });
-        setTimeout(() => {
-            // Xử lý kết thúc trò chơi
-            gameOver();
-        }, 500); // Chờ 0.5 giây trước khi kết thúc trò chơi
+    if (this.hp <= 0) {
+      this.image = null;
+      playSound('sound6');
+      createExplosion({ object: this });
+      setTimeout(() => {
+        gameOver();
+      }, 500);
+    }
+  }
+  collectItem() {
+    this.itemCount++;
+    console.log("Item collected! Bullets evolved.");
+
+    // Tạo một loạt đạn tiến hóa khi thu thập item
+    const numBullets = 8; // Số lượng đạn tiến hóa muốn tạo
+
+    // Góc ban đầu cho các viên đạn
+    const initialAngle = -Math.PI / 2; // Góc ban đầu là vuông góc trên
+
+    // Góc giữa các viên đạn
+    const angleIncrement = (2 * Math.PI) / numBullets;
+
+    // Tạo từng viên đạn tiến hóa và thêm vào mảng bullets
+    for (let i = 0; i < numBullets; i++) {
+        const angle = initialAngle + i * angleIncrement;
+        const velocity = {
+            x: Math.sin(angle) * 10,
+            y: -Math.cos(angle) * 10,
+        };
+        const newBullet = new BulletEvol({
+            position: { x: this.position.x + this.width / 2, y: this.position.y },
+            velocity: velocity,
+        });
+        this.bullets.push(newBullet);
     }
 }
-
 
   checkItemCollision(items) {
     items.forEach((item, index) => {
       if (
-        this.position.y + this.height >= item.position.y && // Kiểm tra va chạm theo chiều dọc
-        this.position.y <= item.position.y + item.height && // Kiểm tra va chạm theo chiều dọc
-        this.position.x + this.width >= item.position.x && // Kiểm tra va chạm theo chiều ngang
-        this.position.x <= item.position.x + item.width && // Kiểm tra va chạm theo chiều ngang
-        player.hp < 100 // Kiểm tra xem HP của người chơi đã dưới 100 chưa
+        this.position.y + this.height >= item.position.y &&
+        this.position.y <= item.position.y + item.height &&
+        this.position.x + this.width >= item.position.x &&
+        this.position.x <= item.position.x + item.width
       ) {
+       
         playSound('sound7');
-
-        // Xóa item khi người chơi ăn được
         items.splice(index, 1);
-        // Tính toán số lượng HP cần tăng, đảm bảo không vượt quá 100
-        const hpToAdd = Math.min(100 - player.hp, 20);
-        // Tăng điểm số hoặc thực hiện hành động tương ứng
-        score += 50; // Ví dụ: Tăng điểm số lên 50 khi ăn được item
-        player.hp += hpToAdd; // Sửa đổi giá trị hp của người chơi
+        this.collectItem();
+        score += 50;
+        const hpToAdd = Math.min(100 - this.hp, 20);
+        this.hp += hpToAdd;
         console.log("Score: ", score);
-        console.log("HP: ", player.hp); // Kiểm tra giá trị hp mới
+        console.log("HP: ", this.hp);
       }
     });
   }
-  
 
   update() {
     if (this.image) {
-      this.draw()
-      this.position.x += this.velocity.x
-
-      
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.bullets.forEach(bullet => bullet.update());
     }
-  }
+    
+    // Tạo một mảng chứa chỉ số các viên đạn cần xóa
+    let bulletsToRemove = [];
 
+    this.bullets.forEach((bullet, bulletIndex) => {
+        if (bullet.position.y + bullet.radius <= 0) {
+            // Xóa đạn khi vượt ra khỏi màn hình
+            bulletsToRemove.push(bulletIndex);
+        } else {
+            // Kiểm tra va chạm giữa đạn và kẻ địch
+            grids.forEach(grid => {
+                grid.enemies.forEach((enemy, enemyIndex) => {
+                    if (bullet instanceof BulletEvol && bullet.checkCollisionWithEnemy(enemy)) {
+                        // Kiểm tra xem enemy có phải là Boss_Last không
+                        if  (enemy instanceof Boss_Last) {
+                            // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
+                            enemy.decreaseHP(0.1); // Giảm 1 HP cho mỗi viên đạn
+                            if (enemy.hp <= 0) {
+                                bossLastDestroyed = true;
+                                score += 10;
+                                console.log("Score: ", score);
+                                if (score >= 3000) {
+                                    showLevel2Message();
+                                }
+                                enemy.destroy(items);
+                                playSound('sound5');
+                                // Đánh dấu viên đạn cần xóa
+                                bulletsToRemove.push(bulletIndex);
+                            }
+                        }
+                        // Tạo hiệu ứng nổ khi đạn va chạm với kẻ địch
+                        createExplosion({ object: enemy });
+                        // Nếu không phải Boss_Last, đánh dấu kẻ địch cần xóa
+                        if (!(enemy instanceof Boss_Last)) {
+                            grid.enemies.splice(enemyIndex, 1);
+                        }
+                    }
+                });
+            });
+        }
+    });
+
+    // Xóa đạn khỏi mảng
+    bulletsToRemove.reverse().forEach(index => {
+        this.bullets.splice(index, 1);
+    });
 }
 
+  
+}
 export class Boss_Last {
   constructor({ position }) {
     this.width = 500;
     this.height = 350;
     this.position = { x: position.x, y: -this.height }; // Khởi tạo vị trí y ở phía trên màn hình
-  this.velocity = { x: 0.5, y: 0.1}; // Đặt vận tốc theo trục y dương
+  this.velocity = { x: 0.3, y: 0.05}; // Đặt vận tốc theo trục y dương
     this.image = new Image();
     this.image.src = './Boss_Last.png';
    
@@ -633,7 +733,7 @@ function animate() {
           if (enemy instanceof Boss_Last) {
             
             // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
-            enemy.decreaseHP(0.1); // Giảm 1 HP cho mỗi viên đạn
+            enemy.decreaseHP(0.05); // Giảm 1 HP cho mỗi viên đạn
             if (enemy.hp <= 0) {
              
               bossLastDestroyed = true;
@@ -746,7 +846,7 @@ function animate() {
           // Kiểm tra xem enemy có phải là Boss_Last không
           if (enemy instanceof Boss_Last) {
             // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
-            enemy.decreaseHP(0.1); // Giảm 1 HP cho mỗi viên đạn
+            enemy.decreaseHP(100); // Giảm 1 HP cho mỗi viên đạn
             if (enemy.hp <= 0) {
               bossLastDestroyed = true;
               grid.enemies.splice(i, 1);
@@ -774,6 +874,7 @@ function animate() {
         enemy.shoot(enemyBullets);
       });
       if (bossLastDestroyed) {
+        showFireworks();
         
       // Đặt cờ gameOverFlag để ngăn chặn các hoạt động tiếp theo
   gameOverFlag = true;
@@ -946,12 +1047,12 @@ function updateScoreAndCheckOverlay() {
   // Đoạn code cập nhật điểm số đã có sẵn trong hàm animate(), chỉ cần di chuyển vào đây
 
   // Kiểm tra điều kiện qua màn 1
-  if (score >= 100 && !level2Flag) { // Thêm điều kiện !level2Flag để đảm bảo chỉ hiển thị overlay một lần
+  if (score >= 200 && !level2Flag) { // Thêm điều kiện !level2Flag để đảm bảo chỉ hiển thị overlay một lần
     level2Flag = true; // Đánh dấu rằng đã hiển thị overlay màn 2
     ThongBaoNextLevel2();
   }
    // Kiểm tra điều kiện qua màn 2
-   if (score >= 200 && level2Flag && !level3Flag) {
+   if (score >= 500 && level2Flag && !level3Flag) {
     level3Flag = true;
     ThongBaoNextLevel3();
   }
@@ -962,9 +1063,12 @@ function ThongBaoNextLevel3() {
   const overlay3 = document.getElementById('overlay2');
   overlay3.style.display = 'flex'; // Hiển thị overlay
   stopShootingSound();
+  playSound('sound8');
+  
   // Dừng vòng lặp chính của game
   cancelAnimationFrame(animationId);
   clearInterval(spawnInterval);
+  
   // Đặt sự kiện lắng nghe khi người chơi nhấn phím Enter để tiếp tục
   window.addEventListener('keydown', handleEnterKey2);
 }
@@ -996,6 +1100,7 @@ function ThongBaoNextLevel2() {
   // Dừng vòng lặp chính của game
   cancelAnimationFrame(animationId);
   clearInterval(spawnInterval);
+  playSound('sound8');
 
   // Đặt sự kiện lắng nghe khi người chơi nhấn phím Enter để tiếp tục
   window.addEventListener('keydown', handleEnterKey);
@@ -1086,7 +1191,7 @@ function startLevel2() {
   // Tạo một môi trường mới cho màn 2
   grids.length = 0; // Xóa các grid của màn trước
   const newGrid = new Grid(); // Tạo một grid mới
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 40; i++) {
     // Thêm kẻ thù loại boss vào grid mới
     const bossEnemy = new Enemy({
       position: {
@@ -1122,7 +1227,7 @@ function startLevel3() {
   grids.length = 0; // Xóa các grid của màn trước
   const newGrid = new Grid(); // Tạo một grid mới
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 15; i++) {
     // Thêm kẻ thù loại boss vào grid mới
     const bossEnemy = new Enemy({
       position: {
@@ -1155,7 +1260,7 @@ function startLevel3() {
   });
   bossEnemy2.isLevel3 = true; // Đặt lại thành true cho màn 3
   bossEnemy2.image.src = 'Boss_Last.png'; // Sử dụng hình ảnh của boss cho màn 3
-  bossEnemy2.hp = 3; // Đặt số lần trúng đạn cần để boss chết
+  bossEnemy2.hp = 5; // Đặt số lần trúng đạn cần để boss chết
   newGrid.enemies.push(bossEnemy2);
 
   grids.push(newGrid); // Thêm grid mới vào mảng grids
@@ -1273,6 +1378,7 @@ document.getElementById('RS_GAME').addEventListener('click', function(e){
 
 
 const audioFiles = {
+  sound8: 'Audio_Game/start.mp3',
   sound7: 'Audio_Game/select.mp3',
   sound1: 'Audio_Game/enemyShoot.wav',
   
@@ -1309,3 +1415,15 @@ document.addEventListener('keydown', function(e) {
     playerShoot(); // Giả sử người chơi bắn đạn khi nhấn phím Space
   }
 });
+
+
+ // Hàm để hiển thị pháo hoa chúc mừng
+ function showFireworks() {
+  confetti({
+      particleCount: 100,
+      spread: 80,
+      origin: { y: 0.6 }
+  });
+  setTimeout(showFireworks, 4000);
+}
+
