@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         // Đặt cửa sổ hiện tại sang trạng thái không có nội dung
        window.close();
+       alert("Tắt cửa sổ window để thoát game:3");
        document.getElementById("Mute-Button").addEventListener("click", function() {
         toggleMute();
     });

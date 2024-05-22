@@ -80,7 +80,7 @@ export class Enemy {
   constructor({ position }) {
     this.velocity = {
       x: 1, // Bắt đầu bằng cách di chuyển sang trái
-      y: 0.09, // Thêm tốc độ y để kẻ thù di chuyển xuống
+      y: 0.06, // Thêm tốc độ y để kẻ thù di chuyển xuống
     }
 
     this.image = new Image()
@@ -114,7 +114,7 @@ export class Enemy {
       },
       velocity: {
         x: 0, // Đạn di chuyển thẳng xuống
-        y: 2, // Tốc độ di chuyển của đạn
+        y: 1.5, // Tốc độ di chuyển của đạn
       }
     }));
   }
@@ -125,9 +125,9 @@ export class Enemy {
   // Kiểm tra xem enemy là ở màn 2 hay không
   if (this.isLevel2) {
     // Nếu ở màn 2, kiểm tra lại với Math.random() để quyết định có item hay không
-    if (Math.random() < 0.3) { // Ví dụ: tỷ lệ là 90%
+    if (Math.random() < 0.2) { // Ví dụ: tỷ lệ là 90%
       const newItem = new Item({ position: this.position, type: 'item_boss' }); // Tạo mới item với loại là 'item_boss'
-      newItem.velocity.y = 2; // Gán vận tốc cho item để rơi xuống
+      newItem.velocity.y = 1; // Gán vận tốc cho item để rơi xuống
       items.push(newItem); // Thêm item vào mảng items
     }
   }
@@ -162,7 +162,7 @@ export class Enemy {
       this.draw();
     }
   
-    this.shootTimer += 0.5; // Tăng đếm thời gian
+    this.shootTimer += 0.9; // Tăng đếm thời gian
     if (this.shootTimer >= this.shootInterval) {
       this.canShoot = true; // Đủ thời gian để bắn đạn
       this.shootTimer = 0; // Đặt lại đếm thời gian
@@ -231,7 +231,7 @@ export class Player {
   constructor() {
     this.velocity = { x: 0, y: 0 };
     this.rotation = 0;
-    this.hp = 100; // Initial health points
+    this.hp = 500; // Initial health points
     this.bullets = []; // Array to store bullets
     this.itemCount = 0; // Keep track of the number of items collected
 
@@ -333,7 +333,7 @@ export class Player {
         items.splice(index, 1);
         this.collectItem();
         score += 50;
-        const hpToAdd = Math.min(100 - this.hp, 20);
+        const hpToAdd = Math.min(1000 - this.hp, 20);
         this.hp += hpToAdd;
         console.log("Score: ", score);
         console.log("HP: ", this.hp);
@@ -401,21 +401,20 @@ export class Boss_Last {
   constructor({ position }) {
     this.width = 500;
     this.height = 350;
-    this.position = { x: position.x, y: -this.height }; // Khởi tạo vị trí y ở phía trên màn hình
-  this.velocity = { x: 0.3, y: 0.05}; // Đặt vận tốc theo trục y dương
+    this.position = { x: position.x, y: -this.height };
+    this.velocity = { x: 0.3, y: 0.05 };
     this.image = new Image();
     this.image.src = './Boss_Last.png';
-   
-    this.maxHp = 500; // Thêm thuộc tính maxHp để lưu trữ máu tối đa của Boss_Last
-    this.hp = this.maxHp; // Đặt máu ban đầu bằng máu tối đa
-    this.shootInterval = 1500;
+
+    this.maxHp = 500;
+    this.hp = this.maxHp;
+    this.shootInterval = 4000; // Thời gian giữa các lần bắn
     this.shootTimer = 0;
     this.isReadyToShoot = false;
     this.isLevel3 = true;
     this.hpBarWidth = this.width;
   }
 
-  // Hàm giảm máu của Boss_Last khi bị đánh
   decreaseHP(amount) {
     this.hp -= amount;
     if (this.hp <= 0) {
@@ -423,18 +422,12 @@ export class Boss_Last {
     }
   }
 
-  // Hàm kiểm tra máu và hủy Boss_Last nếu máu dưới mức quy định
   checkHealthAndDestroy(items) {
     if (this.hp <= 0) {
-      // Kích hoạt hiệu ứng nổ
       createExplosion({ object: this });
-  
-      // Tạo item_boss khi Boss_Last bị tiêu diệt
       const newItem = new Item_Boss({ position: this.position });
       newItem.velocity.y = 2;
       items.push(newItem);
-  
-      // Loại bỏ kẻ địch khỏi grid
       const index = grids[0].enemies.indexOf(this);
       if (index !== -1) {
         grids[0].enemies.splice(index, 1);
@@ -443,19 +436,16 @@ export class Boss_Last {
   }
 
   draw() {
-    // Vẽ hình ảnh của Boss_Last
     c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
-  
-    // Vẽ thanh máu
-    const hpBarHeight = 10; // Chiều cao của thanh máu
-    const hpBarX = this.position.x; // Tọa độ X của thanh máu
-    const hpBarY = this.position.y + this.height + 5; // Tọa độ Y của thanh máu
-    this.hpBarWidth = this.width; // Chiều rộng tối đa của thanh máu
-    const remainingHpWidth = (this.hp / this.maxHp) * this.hpBarWidth*150; // Chiều rộng của thanh máu còn lại
-    const remainingHpColor = 'red'; // Màu của thanh máu còn lại
-  
-    c.fillStyle = remainingHpColor; // Đặt màu cho thanh máu còn lại
-    c.fillRect(hpBarX, hpBarY, remainingHpWidth, hpBarHeight); // Vẽ thanh máu còn lại
+    const hpBarHeight = 10;
+    const hpBarX = this.position.x;
+    const hpBarY = this.position.y + this.height + 5;
+    this.hpBarWidth = this.width;
+    const remainingHpWidth = (this.hp / this.maxHp) * this.hpBarWidth * 150;
+    const remainingHpColor = 'red';
+
+    c.fillStyle = remainingHpColor;
+    c.fillRect(hpBarX, hpBarY, remainingHpWidth, hpBarHeight);
   }
 
   update() {
@@ -472,16 +462,14 @@ export class Boss_Last {
       this.draw();
     }
 
-    this.shootTimer += 10;
+    this.shootTimer += 100;
     if (this.shootTimer >= this.shootInterval) {
       this.isReadyToShoot = true;
       this.shootTimer = 0;
     }
   }
-  
+
   destroy() {
-    // Thực hiện hành động khi đối tượng bị hủy
-    // Ví dụ: Loại bỏ đối tượng khỏi grid
     const index = grids[0].enemies.indexOf(this);
     if (index !== -1) {
       grids[0].enemies.splice(index, 1);
@@ -490,16 +478,74 @@ export class Boss_Last {
 
   shoot(enemyBulletArray) {
     if (this.isReadyToShoot) {
-      enemyBulletArray.push(
-        new EnemyBullet({
-          position: { x: this.position.x + this.width / 2, y: this.position.y + this.height },
-          velocity: { x: 0, y: 2 }
-        })
-      );
+      const warningPosition = { x: this.position.x + this.width / 2, y: this.position.y + this.height };
+      enemyBulletArray.push(new LaserWarning({ position: warningPosition }));
+
+      setTimeout(() => {
+        enemyBulletArray.push(new LaserBullet({ position: warningPosition }));
+      }, 2000);
+
       this.isReadyToShoot = false;
     }
   }
 }
+
+
+// Lớp LaserWarning để vẽ đường cảnh báo
+class LaserWarning {
+  constructor({ position }) {
+    this.position = position;
+    this.width = 50;
+    this.height = canvas.height;
+    this.isWarning = true; // Thêm thuộc tính để nhận biết đây là cảnh báo
+  }
+
+  draw() {
+    c.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+    c.lineWidth = 5;
+    c.beginPath();
+    c.moveTo(this.position.x, this.position.y);
+    c.lineTo(this.position.x, this.position.y + this.height);
+    c.stroke();
+  }
+
+  update() {
+    this.draw();
+  }
+}
+
+
+// Lớp LaserBullet để vẽ và cập nhật đạn laser
+class LaserBullet {
+  constructor({ position }) {
+    this.position = position;
+    this.velocity = { x: 0, y: 8 };
+    this.width = 50;
+    this.height = canvas.height;
+    this.isWarning = false; // Thêm thuộc tính để nhận biết đây là đạn thật
+  }
+
+  draw() {
+    let gradient = c.createRadialGradient(
+      this.position.x + this.width / 2, this.position.y, 100,
+      this.position.x + this.width / 2, this.position.y, this.width / 2000
+    );
+    gradient.addColorStop(0, 'rgba(255, 0, 0, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 0, 0.5)');
+    gradient.addColorStop(1, 'rgba(255, 255, 0, 0)');
+
+    c.fillStyle = gradient;
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+  }
+
+  update() {
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+    this.draw();
+  }
+}
+
+
 
 
 export class Item {
@@ -633,7 +679,7 @@ function drawHealthBar() {
 
   // Vẽ thanh máu
   c.fillStyle = 'green'; // Màu của thanh máu
-  c.fillRect(healthBarX +20, healthBarY, healthBarWidth * (player.hp / 100), healthBarHeight); // Vẽ thanh máu với chiều dài thích hợp dựa trên HP của người chơi
+  c.fillRect(healthBarX +20, healthBarY, healthBarWidth * (player.hp / 500), healthBarHeight); // Vẽ thanh máu với chiều dài thích hợp dựa trên HP của người chơi
 }
 
 function gameOver() {
@@ -654,380 +700,170 @@ let animationRunning = false;
 let shootingSound; // Biến lưu trữ âm thanh bắn đạn
 
 function animate() {
-  // Bỏ qua vòng lặp nếu trò chơi đã kết thúc
-  if (!paused && !gameOverFlag && !animationRunning )
-    {
-  frames++;
-  animationId = requestAnimationFrame(animate);
-  c.fillStyle = 'black';
-  c.clearRect(0, 0, canvas.width, canvas.height); // Xóa màn hình để vẽ lại
-  player.update();
+  if (!paused && !gameOverFlag && !animationRunning) {
+    frames++;
+    animationId = requestAnimationFrame(animate);
+    c.fillStyle = 'black';
+    c.clearRect(0, 0, canvas.width, canvas.height); // Xóa màn hình để vẽ lại
+    player.update();
 
-  Explosions.forEach(explosion => {
-    explosion.update()
-  })
+    Explosions.forEach(explosion => {
+      explosion.update();
+    });
 
-  // Gọi hàm kiểm tra va chạm giữa người chơi và item
-  player.checkItemCollision(items);
+    // Gọi hàm kiểm tra va chạm giữa người chơi và item
+    player.checkItemCollision(items);
 
-  updateScoreAndCheckOverlay();
+    updateScoreAndCheckOverlay();
 
-  drawHealthBar(); // Vẽ lại thanh máu
+    drawHealthBar(); // Vẽ lại thanh máu
 
-  // Cập nhật đạn của người chơi
-  Bullets.forEach((bullet, index) => {
-    if (bullet.position.y + bullet.radius <= 0) {
-      setTimeout(() => {
-        Bullets.splice(index, 1);
-      }, 0);
-    } else {
-      bullet.update();
-    }
-  });
-
-  grids.forEach((grid) => {
-    grid.update();
-    grid.enemies.forEach((enemy, i) => {
-      
-      enemy.update({ velocity: grid.velocity });
-
-      // Tạo đạn từ kẻ thù sau mỗi 100 khung hình
-      if (frames % (100/1.5) === 0) {
-        enemy.spawnEnemyBullet(enemyBullets);
+    // Cập nhật đạn của người chơi
+    Bullets.forEach((bullet, index) => {
+      if (bullet.position.y + bullet.radius <= 0) {
+        setTimeout(() => {
+          Bullets.splice(index, 1);
+        }, 0);
+      } else {
+        bullet.update();
       }
+    });
 
-      // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi
-  enemyBullets.forEach((enemyBullet, k) => {
-    if (
-      enemyBullet.position.y <= player.position.y + player.height &&
-      enemyBullet.position.y + enemyBullet.height >= player.position.y &&
-      enemyBullet.position.x + enemyBullet.width >= player.position.x &&
-      enemyBullet.position.x <= player.position.x + player.width
-      
-    )
-     {
-      // Khi va chạm xảy ra, giảm máu của người chơi
-      player.decreaseHP(10); // Giảm 10 điểm máu khi bị trúng đạn của kẻ địch
-      // Xóa đạn của kẻ địch sau khi va chạm
-      enemyBullets.splice(k, 1);
-      
-    }
-  });
- 
+    grids.forEach((grid) => {
+      grid.update();
+      grid.enemies.forEach((enemy, i) => {
+        enemy.update({ velocity: grid.velocity });
 
-      // Va chạm giữa đạn của người chơi và kẻ địch
-      Bullets.forEach((bullet, j) => {
-        if (
-          bullet.position.y - bullet.radius <= enemy.position.y + enemy.height &&
-          bullet.position.x + bullet.radius >= enemy.position.x &&
-          bullet.position.x - bullet.radius <= enemy.position.x + enemy.width
-        ) { 
-          
-          
-          createExplosion({
-            object: enemy
-          })
-          
-      
-          // Kiểm tra xem enemy có phải là Boss_Last không
-          if (enemy instanceof Boss_Last) {
-            
-            // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
-            enemy.decreaseHP(0.05); // Giảm 1 HP cho mỗi viên đạn
-            if (enemy.hp <= 0) {
-             
-              bossLastDestroyed = true;
+        // Tạo đạn từ kẻ thù sau mỗi 100 khung hình
+        if (frames % (100 / 1.5) === 0) {
+          enemy.spawnEnemyBullet(enemyBullets);
+        }
+
+        // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi
+        enemyBullets.forEach((enemyBullet, k) => {
+          if (enemyBullet.isWarning) {
+            return; // Bỏ qua các đối tượng cảnh báo
+          }
+
+          if (
+            enemyBullet.position.y <= player.position.y + player.height &&
+            enemyBullet.position.y + enemyBullet.height >= player.position.y &&
+            enemyBullet.position.x + enemyBullet.width >= player.position.x &&
+            enemyBullet.position.x <= player.position.x + player.width
+          ) {
+            // Khi va chạm xảy ra, giảm máu của người chơi
+            player.decreaseHP(10); // Giảm 10 điểm máu khi bị trúng đạn của kẻ địch
+            // Xóa đạn của kẻ địch sau khi va chạm
+            enemyBullets.splice(k, 1);
+          }
+        });
+
+        // Va chạm giữa đạn của người chơi và kẻ địch
+        Bullets.forEach((bullet, j) => {
+          if (
+            bullet.position.y - bullet.radius <= enemy.position.y + enemy.height &&
+            bullet.position.x + bullet.radius >= enemy.position.x &&
+            bullet.position.x - bullet.radius <= enemy.position.x + enemy.width
+          ) {
+            createExplosion({
+              object: enemy
+            });
+
+            // Kiểm tra xem enemy có phải là Boss_Last không
+            if (enemy instanceof Boss_Last) {
+              // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
+              enemy.decreaseHP(0.05); // Giảm 0.05 HP cho mỗi viên đạn
+              if (enemy.hp <= 0) {
+                bossLastDestroyed = true;
+                grid.enemies.splice(i, 1);
+                score += 10;
+                if (score >= 3000) {
+                  showLevel2Message();
+                }
+                enemy.destroy(items);
+                playSound('sound5');
+              }
+            } else {
+              // Nếu không phải Boss_Last, hủy ngay lập tức
               grid.enemies.splice(i, 1);
               score += 10;
-              console.log("Score: ", score);
               if (score >= 3000) {
                 showLevel2Message();
               }
               enemy.destroy(items);
-              playSound('sound5');
+              playSound('sound3');
             }
-          } else {
-            // Nếu không phải Boss_Last, hủy ngay lập tức
-            grid.enemies.splice(i, 1);
-            score += 10;
-            console.log("Score: ", score);
-            if (score >= 3000) {
-              showLevel2Message();
-            }
-            enemy.destroy(items);
-            playSound('sound3');
+
+            // Xóa viên đạn sau khi va chạm
+            Bullets.splice(j, 1);
           }
-      
-          // Xóa viên đạn sau khi va chạm
-          Bullets.splice(j, 1);
+          enemy.shoot(enemyBullets);
+        });
+
+        // Chỉ hiển thị pháo hoa và thông báo khi bossLastDestroyed đã thực sự biến mất
+        if (bossLastDestroyed && grid.enemies.length === 0) {
+          showFireworks();
+          setTimeout(() => {
+            ThongBaoEndGame();
+            gameOverFlag = true; // Đặt cờ gameOverFlag để ngăn chặn các hoạt động tiếp theo
+          }, 1000); // Lập lịch hiển thị thông báo sau một giây
         }
-        enemy.shoot(enemyBullets);
       });
-      if (bossLastDestroyed) {
-        
-       function animate() {
-  // Bỏ qua vòng lặp nếu trò chơi đã kết thúc
-  if (!paused && !gameOverFlag && !animationRunning)
-    {
-      animationRunning = true;
-  frames++;
-  animationRunning = false;
-  animationId = requestAnimationFrame(animate);
-  c.fillStyle = 'black';
-  c.clearRect(0, 0, canvas.width, canvas.height); // Xóa màn hình để vẽ lại
-  player.update();
+    });
 
-  Explosions.forEach(explosion => {
-    explosion.update()
-  })
+    // Vẽ tất cả các item có trong mảng items
+    items.forEach(item => {
+      item.update();
+    });
 
-  // Gọi hàm kiểm tra va chạm giữa người chơi và item
-  player.checkItemCollision(items);
+    // HIển thị điểm trên màn hình
+    c.fillStyle = 'white'; // Màu của chữ
+    c.font = '30px Arial'; // Kích thước và kiểu chữ
+    c.fillText('Score: ' + score, 10, 50); // Vị trí của chữ trên màn hình
 
-  updateScoreAndCheckOverlay();
+    // Cập nhật đạn của kẻ địch (cần sửa đoạn này)
+    enemyBullets.forEach((enemyBullet) => {
+      enemyBullet.update();
+    });
 
-  drawHealthBar(); // Vẽ lại thanh máu
-
-   
-
-  // Cập nhật đạn của người chơi
-  Bullets.forEach((bullet, index) => {
-    if (bullet.position.y + bullet.radius <= 0) {
-      setTimeout(() => {
-        Bullets.splice(index, 1);
-      }, 0);
+    if (keys.a.pressed && player.position.x >= 0) {
+      player.velocity.x = -7;
+      player.rotation = -0.15;
+    } else if (keys.d.pressed && player.position.x + player.width <= canvas.width) {
+      player.velocity.x = 7;
+      player.rotation = 0.15;
     } else {
-      bullet.update();
+      player.velocity.x = 0;
+      player.rotation = 0;
     }
-  });
 
-  grids.forEach((grid) => {
-    grid.update();
-    grid.enemies.forEach((enemy, i) => {
-   
-    
-      enemy.update({ velocity: grid.velocity });
-
-      // Tạo đạn từ kẻ thù sau mỗi 100 khung hình
-      if (frames % (2000/1.5) === 0) {
-        enemy.spawnEnemyBullet(enemyBullets);
-      }
-
-      // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi
-  enemyBullets.forEach((enemyBullet, k) => {
-    if (
-      enemyBullet.position.y <= player.position.y + player.height &&
-      enemyBullet.position.y + enemyBullet.height >= player.position.y &&
-      enemyBullet.position.x + enemyBullet.width >= player.position.x &&
-      enemyBullet.position.x <= player.position.x + player.width
-    ) {
-      // Khi va chạm xảy ra, giảm máu của người chơi
-      player.decreaseHP(10); // Giảm 10 điểm máu khi bị trúng đạn của kẻ địch
-      // Xóa đạn của kẻ địch sau khi va chạm
-      enemyBullets.splice(k, 1);
-      
-    }
-  });
-
-   
-
-
-      // Va chạm giữa đạn của người chơi và kẻ địch
-      Bullets.forEach((bullet, j) => {
-        if (
-          bullet.position.y - bullet.radius <= enemy.position.y + enemy.height &&
-          bullet.position.x + bullet.radius >= enemy.position.x &&
-          bullet.position.x - bullet.radius <= enemy.position.x + enemy.width
-        ) {
-          createExplosion({
-            object: enemy
-          })
-      
-          // Kiểm tra xem enemy có phải là Boss_Last không
-          if (enemy instanceof Boss_Last) {
-            // Nếu là Boss_Last, giảm máu và kiểm tra xem nó có còn sống không
-            enemy.decreaseHP(100); // Giảm 1 HP cho mỗi viên đạn
-            if (enemy.hp <= 0) {
-              bossLastDestroyed = true;
-              grid.enemies.splice(i, 1);
-              score += 10;
-              console.log("Score: ", score);
-              if (score >= 3000) {
-                showLevel2Message();
+    if ((keys.a.pressed && keys.ArrowLeft.pressed) || (keys.d.pressed && keys.ArrowRight.pressed)) {
+      if (!shootingKeyDown) {
+        playerShoot();
+        shootingInterval = setInterval(() => {
+          Bullets.push(
+            new Bullet({
+              position: {
+                x: player.position.x + player.width / 2,
+                y: player.position.y,
+              },
+              velocity: {
+                x: 0,
+                y: -15,
               }
-              enemy.destroy(items);
-            }
-          } else {
-            // Nếu không phải Boss_Last, hủy ngay lập tức
-            grid.enemies.splice(i, 1);
-            score += 10;
-            console.log("Score: ", score);
-            if (score >= 3000) {
-              showLevel2Message();
-            }
-            enemy.destroy(items);
-          }
-      
-          // Xóa viên đạn sau khi va chạm
-          Bullets.splice(j, 1);
-        }
-        enemy.shoot(enemyBullets);
-      });
-      if (bossLastDestroyed) {
-        showFireworks();
-        
-      // Đặt cờ gameOverFlag để ngăn chặn các hoạt động tiếp theo
-  gameOverFlag = true;
-  // Lập lịch hiển thị thông báo sau một giây
-  setTimeout(ThongBaoEndGame, 1000);
+            })
+          );
+        }, 200);
+
+        shootingKeyDown = true;
       }
-    });
-  });
-      
-// Vẽ tất cả các item có trong mảng items
-items.forEach(item => {
-  item.update();
-});
-  //HIển thị điểm trên màn hình
-  c.fillStyle = 'white'; // Màu của chữ
-  c.font = '30px Arial'; // Kích thước và kiểu chữ
-  c.fillText('Score: ' + score, 10, 50); // Vị trí của chữ trên màn hình
-
-  // Cập nhật đạn của kẻ địch (cần sửa đoạn này)
-  enemyBullets.forEach((enemyBullet) => {
-    enemyBullet.update();
-  });
-
-  if (keys.a.pressed && player.position.x >= 0) {
-    player.velocity.x = -7;
-    player.rotation = -0.15;
-  } else if (keys.d.pressed && player.position.x + player.width <= canvas.width) {
-    player.velocity.x = 7;
-    player.rotation = 0.15;
-  } else {
-    player.velocity.x = 0;
-    player.rotation = 0;
-  }
-
-  if ((keys.a.pressed && keys.ArrowLeft.pressed) || (keys.d.pressed && keys.ArrowRight.pressed)) {
-    // Kiểm tra xem đã bắn đạn chưa, nếu chưa thì bắt đầu bắn
-    if (!shootingKeyDown) {
-      // Bắt đầu setInterval để tự động bắn đạn mỗi 0.2 giây
-      shootingInterval = setInterval(() => {
-        Bullets.push(
-          new Bullet({
-            position: {
-              x: player.position.x + player.width / 2,
-              y: player.position.y,
-            },
-            velocity: {
-              x: 0,
-              y: -15,
-            }
-          })
-        );
-        playSound('sound1');
-      }, 200);
-
-      shootingKeyDown = true; // Đánh dấu rằng phím đã được giữ
+    } else {
+      clearInterval(shootingInterval);
+      shootingKeyDown = false;
     }
-  } else {
-    // Nếu không giữ phím nữa, dừng bắn và đặt lại trạng thái
-    clearInterval(shootingInterval); // Dừng setInterval
-    shootingKeyDown = false; // Đánh dấu rằng phím không còn được giữ nữa
   }
-
-  // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi, nếu trò chơi chưa kết thúc
-  enemyBullets.forEach((enemyBullet, k) => {
-    if (
-      enemyBullet.position.y <= player.position.y + player.height &&
-      enemyBullet.position.y + enemyBullet.height >= player.position.y &&
-      enemyBullet.position.x + enemyBullet.width >= player.position.x &&
-      enemyBullet.position.x <= player.position.x + player.width
-    ) {
-    
-    }
-  });
 }
-}
-animate();
-      }
-    });
-  });
-      
-// Vẽ tất cả các item có trong mảng items
-items.forEach(item => {
-  item.update();
-});
-  //HIển thị điểm trên màn hình
-  c.fillStyle = 'white'; // Màu của chữ
-  c.font = '30px Arial'; // Kích thước và kiểu chữ
-  c.fillText('Score: ' + score, 10, 50); // Vị trí của chữ trên màn hình
 
-  // Cập nhật đạn của kẻ địch (cần sửa đoạn này)
-  enemyBullets.forEach((enemyBullet) => {
-    enemyBullet.update();
-  });
-
-  if (keys.a.pressed && player.position.x >= 0) {
-    player.velocity.x = -7;
-    player.rotation = -0.15;
-  } else if (keys.d.pressed && player.position.x + player.width <= canvas.width) {
-    player.velocity.x = 7;
-    player.rotation = 0.15;
-  } else {
-    player.velocity.x = 0;
-    player.rotation = 0;
-  }
-
-  if ((keys.a.pressed && keys.ArrowLeft.pressed) || (keys.d.pressed && keys.ArrowRight.pressed)) {
-    // Kiểm tra xem đã bắn đạn chưa, nếu chưa thì bắt đầu bắn
-    if (!shootingKeyDown) {
-      playerShoot();
-      // Bắt đầu setInterval để tự động bắn đạn mỗi 0.2 giây
-      shootingInterval = setInterval(() => {
-        
-        Bullets.push(
-          new Bullet({
-            position: {
-              x: player.position.x + player.width / 2,
-              y: player.position.y,
-            },
-            velocity: {
-              x: 0,
-              y: -15,
-            }
-          })
-        );
-       
-          
-       
-          
-        
-      }, 200);
-   
-
-      shootingKeyDown = true; // Đánh dấu rằng phím đã được giữ
-    }
-  } else {
-    // Nếu không giữ phím nữa, dừng bắn và đặt lại trạng thái
-    clearInterval(shootingInterval); // Dừng setInterval
-    shootingKeyDown = false; // Đánh dấu rằng phím không còn được giữ nữa
-  }
-
-  // Kiểm tra va chạm giữa đạn của kẻ địch và người chơi, nếu trò chơi chưa kết thúc
-  enemyBullets.forEach((enemyBullet, k) => {
-    if (
-      enemyBullet.position.y <= player.position.y + player.height &&
-      enemyBullet.position.y + enemyBullet.height >= player.position.y &&
-      enemyBullet.position.x + enemyBullet.width >= player.position.x &&
-      enemyBullet.position.x <= player.position.x + player.width
-    ) {
-    
-    }
-  });
-}
-}
 animate();
 
 
@@ -1154,7 +990,7 @@ function resetGame() {
   Bullets.length = 0;
   enemyBullets.length = 0;
   Explosions.length = 0;
-  score = 0; // Đặt lại điểm số
+  // score = 0; // Đặt lại điểm số
   
 }
 
@@ -1165,7 +1001,7 @@ function restart() {
   Bullets.length = 0;
   enemyBullets.length = 0;
   Explosions.length = 0;
-  score = 0; // Đặt lại điểm số
+  // score = 0; // Đặt lại điểm số
   animate()
   console.log("Game restarted");
   window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html';
@@ -1180,7 +1016,7 @@ function spawnEnemies() {
   grids.push(new Grid());
 
   // Thiết lập một khoảng thời gian để tạo ra kẻ thù tiếp theo
-  spawnInterval = setTimeout(spawnEnemies, 12000); // Tạo ra một kẻ thù mới mỗi 2 giây
+  spawnInterval = setTimeout(spawnEnemies, 7000); // Tạo ra một kẻ thù mới mỗi 2 giây
 }
 
 // Bắt đầu tạo kẻ thù
@@ -1290,61 +1126,67 @@ document.addEventListener('keydown', function(event) {
 
 
 
+let spaceKeyDown = false; // Biến cờ để kiểm tra xem phím Space đã được nhấn hay chưa
+let spaceCooldown = false; // Biến cờ để kiểm tra xem có đang trong thời gian chờ không
+const spaceCooldownTime = 200; // Thời gian chờ giữa các lần bắn (milliseconds)
+
 addEventListener('keydown', ({ key }) => {
   switch (key) {
     case 'a':
     case 'ArrowLeft':
-      //console.log('left')
       player.velocity.x = -7;
       keys.a.pressed = true
       keys.ArrowLeft.pressed = true
       break;
     case 'd':
     case 'ArrowRight':
-      //console.log('right')
       player.velocity.x = 7;
       keys.d.pressed = true
       keys.ArrowRight.pressed = true
       break;
     case ' ':
-      console.log('space')
-      Bullets.push(
-        new Bullet({
-          position: {
-            x: player.position.x + player.width / 2,
-            y: player.position.y,
-          },
-          velocity: {
-            x: 0,
-            y: -10,
-          }
-        })
-      )
+      if (!spaceKeyDown && !spaceCooldown) { // Chỉ bắn nếu chưa nhấn phím Space và không đang trong thời gian chờ
+        spaceKeyDown = true;
+        spaceCooldown = true; // Bắt đầu thời gian chờ
+        setTimeout(() => {
+          spaceCooldown = false; // Sau khi thời gian chờ kết thúc, cho phép bắn tiếp theo
+        }, spaceCooldownTime);
+        Bullets.push(
+          new Bullet({
+            position: {
+              x: player.position.x + player.width / 2,
+              y: player.position.y,
+            },
+            velocity: {
+              x: 0,
+              y: -10,
+            }
+          })
+        );
+      }
       break;
   }
-})
+});
 
 addEventListener('keyup', ({ key }) => {
   switch (key) {
     case 'a':
     case 'ArrowLeft':
-      // console.log('left')
       player.velocity.x = -7;
       keys.a.pressed = false;
       keys.ArrowLeft.pressed = false;
       break;
     case 'd':
     case 'ArrowRight':
-      //   console.log('right')
       player.velocity.x = 7;
       keys.d.pressed = false
       keys.ArrowRight.pressed = false
       break;
     case ' ':
-      //  console.log('space')
+      spaceKeyDown = false; // Đặt biến cờ về false khi người chơi thả phím Space
       break;
   }
-})
+});
 
 document.getElementById('pauseBtn').addEventListener('click', function(e) {
   paused = true;
@@ -1426,4 +1268,3 @@ document.addEventListener('keydown', function(e) {
   });
   setTimeout(showFireworks, 4000);
 }
-
