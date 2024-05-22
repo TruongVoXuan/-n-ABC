@@ -1,3 +1,4 @@
+
 // Định nghĩa các tệp âm thanh
 const audioFiles = {
     sound1: 'backgroundMusic.wav'

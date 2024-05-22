@@ -806,7 +806,7 @@ function animate() {
           setTimeout(() => {
             ThongBaoEndGame();
             gameOverFlag = true; // Đặt cờ gameOverFlag để ngăn chặn các hoạt động tiếp theo
-          }, 1000); // Lập lịch hiển thị thông báo sau một giây
+          }, 10); // Lập lịch hiển thị thông báo sau một giây
         }
       });
     });
@@ -951,7 +951,7 @@ function handleEnterKey(event) {
 
     // Nếu đã qua màn 3, chuyển về trang index_menu.html
     if (level3Flag) {
-      window.location.href = "http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html";
+      window.location.href = "http://127.0.0.1:5500/TEST_GAME/Menu_Game/index.html";
     } else {
       // Nếu chưa qua màn 3, đặt lại trạng thái của game và bắt đầu màn 2
       resetGame();
@@ -1004,7 +1004,7 @@ function restart() {
   // score = 0; // Đặt lại điểm số
   animate()
   console.log("Game restarted");
-  window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html';
+  window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index.html';
 }
 
 
@@ -1120,7 +1120,7 @@ document.addEventListener('keydown', function(event) {
   // Nếu phím Esc được nhấn
   if (event.key === 'Escape') {
       // Chuyển hướng về trang menu_game.html
-      window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index_menu.html';
+      window.location.href = 'http://127.0.0.1:5500/TEST_GAME/Menu_Game/index.html';
   }
 });
 
